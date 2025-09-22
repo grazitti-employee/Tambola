@@ -1,0 +1,53 @@
+/* src/App.css - basic styles for Tambola single-player demo */
+:root{
+  --bg: #f4f6f8;
+  --card: #ffffff;
+  --accent: #1f77b4;
+  --muted: #666;
+  --success: #2c9f68;
+  --danger: #d9534f;
+}
+
+*{box-sizing:border-box}
+body,html,#root{height:100%;margin:0;font-family:Inter,system-ui,Arial,Helvetica,sans-serif;background:var(--bg);color:#111}
+.app{max-width:1100px;margin:18px auto;padding:18px}
+header h1{margin:0 0 6px 0}
+.muted{color:var(--muted);font-size:13px}
+
+main{display:flex;gap:16px;margin-top:12px;align-items:flex-start}
+.left-panel{flex:1;display:flex;flex-direction:column;gap:12px}
+.right-panel{width:360px;display:flex;flex-direction:column;gap:12px}
+
+.card{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(15,15,15,0.06)}
+.card.small{padding:8px}
+.controls-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.controls-row.compact{justify-content:space-between}
+.controls-row label{display:flex;flex-direction:column;gap:6px;font-size:13px}
+
+.ticket{display:flex;flex-direction:column;gap:6px;padding:6px;border-radius:6px;background:linear-gradient(180deg,#fff,#fafafa)}
+.ticket-row{display:grid;grid-template-columns:repeat(9,1fr);gap:6px}
+.ticket-cell{height:46px;border-radius:6px;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:600}
+.ticket-cell.empty{background:transparent;border:0}
+.ticket-cell.marked{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 3px 8px rgba(31,119,180,0.14)}
+
+.called-numbers h4, .notifications h4{margin:0 0 8px 0}
+.called-grid{display:flex;flex-wrap:wrap;gap:6px}
+.called-num{width:44px;height:36px;border-radius:6px;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;font-weight:600;background:#fff}
+
+.notifications-list{display:flex;flex-direction:column;gap:6px}
+.notification{padding:6px;border-radius:6px;background:#f8f9fb;border-left:4px solid var(--accent);font-size:14px}
+
+.claim-buttons{display:flex;flex-direction:column;gap:8px}
+.claim-row{display:flex;gap:8px;align-items:center}
+.claim-row .claim-meta{font-size:13px;color:var(--muted)}
+button{padding:8px 12px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer}
+button:disabled{opacity:0.6;cursor:not-allowed}
+button.claimed{background:var(--success);color:#fff;border-color:var(--success)}
+
+footer{margin-top:18px;text-align:center;font-size:13px;color:var(--muted)}
+
+/* Responsive */
+@media (max-width:900px){
+  main{flex-direction:column}
+  .right-panel{width:100%}
+}

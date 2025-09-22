@@ -1,0 +1,23 @@
+.ticket {
+  display: inline-block;
+  border: 2px solid #333;
+}
+.ticket-row {
+  display: flex;
+}
+.ticket-cell {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.ticket-cell.marked {
+  background-color: yellow;
+}
+.ticket-cell.empty {
+  background-color: #eee;
+  cursor: default;
+}
