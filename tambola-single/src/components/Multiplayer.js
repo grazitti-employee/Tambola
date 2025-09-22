@@ -12,21 +12,37 @@ export default function Multiplayer({ onBack }) {
   const [calledNumbers, setCalledNumbers] = useState([]);
   const [claimedPatterns, setClaimedPatterns] = useState({});
   const [isHost, setIsHost] = useState(false);
-  const [mode, setMode] = useState(null); // "create" or "join"
 
   const [joinRoomId, setJoinRoomId] = useState("");
   const [joinUsername, setJoinUsername] = useState("");
+  const [notifications, setNotifications] = useState([]);
+
+  function addNotification(msg) {
+    setNotifications((prev) => [msg, ...prev].slice(0, 50));
+  }
 
   useEffect(() => {
     socket.on("playerList", setPlayers);
-    socket.on("gameStarted", () => alert("Game started!"));
-    socket.on("numberCalled", (n) => setCalledNumbers(prev => [...prev, n]));
-    socket.on("patternClaimed", ({ pattern, by }) => {
-      alert(`${by} claimed ${pattern}`);
-      setClaimedPatterns(prev => ({ ...prev, [pattern]: by }));
+
+    socket.on("gameStarted", () => {
+      addNotification("Game started!");
     });
+
+    socket.on("numberCalled", (n) => {
+      setCalledNumbers((prev) => [...prev, n]);
+    });
+
+    socket.on("notification", (msg) => {
+      addNotification(msg);
+    });
+
+    socket.on("patternClaimed", ({ pattern, by }) => {
+      addNotification(`${by} claimed ${pattern}`);
+      setClaimedPatterns((prev) => ({ ...prev, [pattern]: by }));
+    });
+
     socket.on("claimResult", ({ pattern, success, msg }) => {
-      if (!success) alert(`Claim failed for ${pattern}: ${msg}`);
+      if (!success) addNotification(`Claim failed for ${pattern}: ${msg}`);
     });
 
     return () => socket.off();
@@ -37,9 +53,6 @@ export default function Multiplayer({ onBack }) {
     socket.emit("createRoom", (newRoomId) => {
       setRoomId(newRoomId);
       setIsHost(true);
-      setMode("create");
-
-      // Host joins automatically
       socket.emit("joinRoom", { roomId: newRoomId, username }, ({ ticket }) => {
         setTicket(ticket);
       });
@@ -53,7 +66,6 @@ export default function Multiplayer({ onBack }) {
       setTicket(ticket);
       setRoomId(joinRoomId);
       setUsername(joinUsername);
-      setMode("join");
     });
   };
 
@@ -76,7 +88,7 @@ export default function Multiplayer({ onBack }) {
           <input
             placeholder="Your Username"
             value={username}
-            onChange={e => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)}
           />
           <button onClick={createRoom}>Create Room</button>
 
@@ -87,12 +99,12 @@ export default function Multiplayer({ onBack }) {
             <input
               placeholder="Room ID"
               value={joinRoomId}
-              onChange={e => setJoinRoomId(e.target.value)}
+              onChange={(e) => setJoinRoomId(e.target.value)}
             />
             <input
               placeholder="Username"
               value={joinUsername}
-              onChange={e => setJoinUsername(e.target.value)}
+              onChange={(e) => setJoinUsername(e.target.value)}
             />
             <button type="submit">Join Room</button>
           </form>
@@ -110,8 +122,8 @@ export default function Multiplayer({ onBack }) {
             onCellClick={(cell) => {
               const n = cell.number;
               if (calledNumbers.includes(n)) {
-                const newGrid = ticket.map(r =>
-                  r.map(c => (c && c.number === n ? { ...c, marked: !c.marked } : c))
+                const newGrid = ticket.map((r) =>
+                  r.map((c) => (c && c.number === n ? { ...c, marked: !c.marked } : c))
                 );
                 setTicket(newGrid);
               }
@@ -119,12 +131,13 @@ export default function Multiplayer({ onBack }) {
           />
 
           <div>
-            <h4>Called Numbers</h4>
-            {calledNumbers.join(", ")}
+            <h4>Called Numbers ({calledNumbers.length})</h4>
+            <div>{calledNumbers.join(", ")}</div>
           </div>
 
           <div>
-            {["First Five", "Top Line", "Middle Line", "Bottom Line", "Full Housie"].map(p => (
+            <h4>Claim Patterns</h4>
+            {["First Five", "Top Line", "Middle Line", "Bottom Line", "Full Housie"].map((p) => (
               <button
                 key={p}
                 disabled={claimedPatterns[p]}
@@ -133,6 +146,15 @@ export default function Multiplayer({ onBack }) {
                 {claimedPatterns[p] ? `${p} — Claimed by ${claimedPatterns[p]}` : `Claim ${p}`}
               </button>
             ))}
+          </div>
+
+          <div>
+            <h4>Notifications</h4>
+            <ul>
+              {notifications.map((n, i) => (
+                <li key={i}>{n}</li>
+              ))}
+            </ul>
           </div>
         </div>
       )}
