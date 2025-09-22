@@ -155,4 +155,31 @@ io.on("connection", (socket) => {
   });
 });
 
+// server.js
+io.on("connection", (socket) => {
+  socket.on("startGame", ({ roomId }) => {
+    let numbers = Array.from({ length: 90 }, (_, i) => i + 1)
+      .sort(() => Math.random() - 0.5);
+
+    io.to(roomId).emit("notification", "Game Started!");
+    
+    let interval = setInterval(() => {
+      if (numbers.length === 0) {
+        clearInterval(interval);
+        io.to(roomId).emit("notification", "All numbers called. Game over!");
+        return;
+      }
+      const next = numbers.shift();
+      io.to(roomId).emit("numberCalled", next);
+      io.to(roomId).emit("notification", `Number called: ${next}`);
+    }, 3000);
+
+    // Stop game if room closes
+    socket.on("disconnect", () => clearInterval(interval));
+  });
+});
+
+
 server.listen(5000, () => console.log("Socket.IO server running on port 5000"));
+
+
