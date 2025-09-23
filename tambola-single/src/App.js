@@ -2,18 +2,20 @@ import React, { useState } from "react";
 import GameModeSelection from "./components/GameModeSelection";
 import SinglePlayer from "./components/SinglePlayer";
 import Multiplayer from "./components/Multiplayer";
-// import "./App.css";
+import "./App.css";
 
 export default function App() {
-  const [page, setPage] = useState("gamemode"); 
+  const [page, setPage] = useState("gamemode");
 
   return (
-    <div className="gamemode-root">
+    <div>
       {page === "gamemode" && (
-        <GameModeSelection
-          onSinglePlayer={() => setPage("singleplayer")}
-          onMultiPlayer={() => setPage("multiplayer")} 
-        />
+        <div className="gamemode-root">
+          <GameModeSelection
+            onSinglePlayer={() => setPage("singleplayer")}
+            onMultiPlayer={() => setPage("multiplayer")}
+          />
+        </div>
       )}
 
       {page === "singleplayer" && (

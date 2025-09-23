@@ -1,51 +1,63 @@
+:root {
+  --bg: #cfd6e2;
+  --card: #ffffff;
+  --muted: #8b95a3;
+  --accent: #2b7a78;
+  --accent-2: #145a6b;
+  --cell-size: 46px;
+  font-family: "Inter", sans-serif;
+}
 
-/* .gamemode-root {
-  margin: 0;
-  padding: 0;
+.gamemode-root {
   height: 100%;
-  font-family: 'Poppins', sans-serif;
-  background: radial-gradient(circle at top, #ffe259, #ffa751);
-
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-} */
 
-/* .gamemode-root h1 {
+  /* Match game palette */
+  background: radial-gradient(circle at top, var(--bg), var(--card));
+  font-family: "Inter", sans-serif;
+}
+
+/* Title (only inside gamemode page) */
+.gamemode-root h1 {
   font-size: 2.8rem;
   font-weight: 800;
-  color: #222;
+  color: var(--accent-2);
   margin-bottom: 50px;
-  text-shadow: 2px 4px 6px rgba(0,0,0,0.25);
+  text-shadow: 2px 4px 6px rgba(0, 0, 0, 0.15);
   letter-spacing: 1px;
 }
 
+/* Buttons (only inside gamemode page) */
 .gamemode-root button {
-  background: #fff;
-  border: 3px solid #ff9800;
+  background: var(--card);
+  border: 3px solid var(--accent);
   border-radius: 18px;
   padding: 18px 48px;
   margin: 12px;
   font-size: 1.3rem;
   font-weight: 700;
-  color: #ff9800;
+  color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 1px;
   cursor: pointer;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
   transition: all 0.25s ease;
 }
 
+/* Hover + active effects */
 .gamemode-root button:hover {
-  background: #ff9800;
-  color: #fff;
+  background: var(--accent);
+  color: var(--card);
   transform: translateY(-4px) scale(1.05);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
 }
 
 .gamemode-root button:active {
   transform: translateY(2px) scale(0.98);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-} */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
