@@ -1,6 +1,6 @@
 // src/components/Ticket.js
 import React from "react";
-import "./Ticket.css"; // Optional CSS
+import "./Ticket.css"; // Optional 
 
 export default function Ticket({ grid, onCellClick }) {
   return (

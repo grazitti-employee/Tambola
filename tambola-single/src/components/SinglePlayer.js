@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import "../App.css"; // keep your styles
+// import "../App.css"; // keep your styles
+import "./SinglePlayer.css";
 
 /* ---------------- Helper functions ---------------- */
 function shuffleArray(arr) {
@@ -151,9 +152,8 @@ function Ticket({ grid, onCellClick }) {
           {row.map((cell, cIdx) => (
             <div
               key={cIdx}
-              className={`ticket-cell ${cell ? "" : "empty"} ${
-                cell && cell.marked ? "marked" : ""
-              }`}
+              className={`ticket-cell ${cell ? "" : "empty"} ${cell && cell.marked ? "marked" : ""
+                }`}
               onClick={() => cell && onCellClick(cell)}
             >
               {cell ? cell.number : ""}
@@ -356,12 +356,17 @@ export default function SinglePlayer({ onBack }) {
   return (
     <div className="app">
       {/* Back Button */}
-      <button onClick={onBack} className="back-btn">
-        ⬅ Back
-      </button>
+
+
 
       <header>
-        <h1>Tambola — Single Player</h1>
+        <div><button onClick={onBack} className="back-btn">
+          ⬅ Back
+        </button></div>
+
+        <div>        <h1>Tambola — Single Player</h1>
+        </div>
+
       </header>
 
       <main>
