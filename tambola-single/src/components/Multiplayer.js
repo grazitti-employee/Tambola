@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import Ticket from "./Ticket";
-//this is a test.....yes leevance this is a test indeed!
+import "./Multiplayer.css";
+
 const socket = io("http://172.16.21.165:5000");
 // const socket = io("http://172.16.21.146:5000");
-
 
 export default function Multiplayer({ onBack }) {
   const [roomId, setRoomId] = useState("");
@@ -63,12 +63,17 @@ export default function Multiplayer({ onBack }) {
 
   const joinRoom = (e) => {
     e.preventDefault();
-    if (!joinUsername.trim() || !joinRoomId.trim()) return alert("Enter username and room ID");
-    socket.emit("joinRoom", { roomId: joinRoomId, username: joinUsername }, ({ ticket }) => {
-      setTicket(ticket);
-      setRoomId(joinRoomId);
-      setUsername(joinUsername);
-    });
+    if (!joinUsername.trim() || !joinRoomId.trim())
+      return alert("Enter username and room ID");
+    socket.emit(
+      "joinRoom",
+      { roomId: joinRoomId, username: joinUsername },
+      ({ ticket }) => {
+        setTicket(ticket);
+        setRoomId(joinRoomId);
+        setUsername(joinUsername);
+      }
+    );
   };
 
   const startGame = () => {
@@ -80,41 +85,45 @@ export default function Multiplayer({ onBack }) {
   };
 
   return (
-    <div>
+    <div className="multiplayer-root">
       <button onClick={onBack}>⬅ Back</button>
       <h2>Multiplayer</h2>
 
+      {/* Before room is created/joined */}
       {!roomId && !ticket.length && (
-        <div>
-          <h4>Create Room</h4>
-          <input
-            placeholder="Your Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-          <button onClick={createRoom}>Create Room</button>
-
-          <hr />
-
-          <h4>Join Existing Room</h4>
-          <form onSubmit={joinRoom}>
+        <>
+          <div className="multiplayer-card">
+            <h4>Create Room</h4>
             <input
-              placeholder="Room ID"
-              value={joinRoomId}
-              onChange={(e) => setJoinRoomId(e.target.value)}
+              placeholder="Your Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
-            <input
-              placeholder="Username"
-              value={joinUsername}
-              onChange={(e) => setJoinUsername(e.target.value)}
-            />
-            <button type="submit">Join Room</button>
-          </form>
-        </div>
+            <button onClick={createRoom}>Create Room</button>
+          </div>
+
+          <div className="multiplayer-card">
+            <h4>Join Existing Room</h4>
+            <form onSubmit={joinRoom}>
+              <input
+                placeholder="Room ID"
+                value={joinRoomId}
+                onChange={(e) => setJoinRoomId(e.target.value)}
+              />
+              <input
+                placeholder="Username"
+                value={joinUsername}
+                onChange={(e) => setJoinUsername(e.target.value)}
+              />
+              <button type="submit">Join Room</button>
+            </form>
+          </div>
+        </>
       )}
 
+      {/* After room is joined/created */}
       {roomId && ticket.length > 0 && (
-        <div>
+        <div className="multiplayer-card">
           <h4>Room: {roomId}</h4>
           <h4>Players: {players.join(", ")}</h4>
           {isHost && <button onClick={startGame}>Start Game</button>}
@@ -125,7 +134,9 @@ export default function Multiplayer({ onBack }) {
               const n = cell.number;
               if (calledNumbers.includes(n)) {
                 const newGrid = ticket.map((r) =>
-                  r.map((c) => (c && c.number === n ? { ...c, marked: !c.marked } : c))
+                  r.map((c) =>
+                    c && c.number === n ? { ...c, marked: !c.marked } : c
+                  )
                 );
                 setTicket(newGrid);
               }
@@ -139,15 +150,19 @@ export default function Multiplayer({ onBack }) {
 
           <div>
             <h4>Claim Patterns</h4>
-            {["First Five", "Top Line", "Middle Line", "Bottom Line", "Full Housie"].map((p) => (
-              <button
-                key={p}
-                disabled={claimedPatterns[p]}
-                onClick={() => claimPattern(p)}
-              >
-                {claimedPatterns[p] ? `${p} — Claimed by ${claimedPatterns[p]}` : `Claim ${p}`}
-              </button>
-            ))}
+            {["First Five", "Top Line", "Middle Line", "Bottom Line", "Full Housie"].map(
+              (p) => (
+                <button
+                  key={p}
+                  disabled={claimedPatterns[p]}
+                  onClick={() => claimPattern(p)}
+                >
+                  {claimedPatterns[p]
+                    ? `${p} — Claimed by ${claimedPatterns[p]}`
+                    : `Claim ${p}`}
+                </button>
+              )
+            )}
           </div>
 
           <div>

@@ -364,10 +364,6 @@ export default function SinglePlayer({ onBack }) {
 
   return (
     <div className="app">
-      {/* Back Button */}
-
-
-
       <header>
         <div>
           <button onClick={onBack} className="back-btn">⬅ Back</button>
