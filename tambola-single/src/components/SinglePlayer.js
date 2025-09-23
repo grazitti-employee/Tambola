@@ -15,7 +15,7 @@ function shuffleArray(arr) {
 function range(n, start = 1) {
   return Array.from({ length: n }, (_, i) => i + start);
 }
-
+//18
 function getNRandomUnique(from, to, count) {
   const pool = range(to - from + 1, from);
   return shuffleArray(pool).slice(0, count);
@@ -99,17 +99,40 @@ function Ticket({ grid, onCellClick }) {
 function CalledNumbers({ called }) {
   return (
     <div className="called-numbers">
-      <h4>Called Numbers ({called.length})</h4>
+      <h4>Called Numbers ({called.length}/90)</h4>
       <div className="called-grid">
-        {called.map((n) => (
-          <div key={n} className="called-num">
-            {n}
-          </div>
-        ))}
+        {Array.from({ length: 90 }, (_, i) => {
+          const num = i + 1;
+          const isCalled = called.includes(num);
+          return (
+            <div
+              key={num}
+              className={`called-num ${isCalled ? "highlight" : ""}`}
+            >
+              {num}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
+
+
+// function CalledNumbers({ called }) {
+//   return (
+//     <div className="called-numbers">
+//       <h4>Called Numbers ({called.length})</h4>
+//       <div className="called-grid">
+//         {called.map((n) => (
+//           <div key={n} className="called-num">
+//             {n}
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// }
 
 function Notifications({ list }) {
   return (
@@ -291,46 +314,50 @@ export default function SinglePlayer({ onBack }) {
 
 
       <header>
-        <div><button onClick={onBack} className="back-btn">
-          ⬅ Back
-        </button></div>
-
-        <div>        <h1>Tambola — Single Player</h1>
+        <div>
+          <button onClick={onBack} className="back-btn">⬅ Back</button>
         </div>
 
+        <div><h1>Tambola — Single Player</h1></div>
       </header>
 
       <main>
         <section className="left-panel">
-          <div className="controls card">
+          <div className="card controls">
             <h4>Controls</h4>
-            <button onClick={generateNewTicketAndReset}>New Ticket & Reset</button>
-            <button onClick={callNextNumber}>Call Next (manual)</button>
-            <button onClick={resetPauseResume}>
-              {status === "running" ? "Pause" : "Start"}
-            </button>
-            <button onClick={pauseCalling}>Pause</button>
+            <div>
+              <button onClick={generateNewTicketAndReset}>New Ticket & Reset</button>
+              <button onClick={callNextNumber}>Call Next (manual)</button>
+              <button onClick={resetPauseResume}>
+                {status === "running" ? "Pause" : "Start"}
+              </button>
+              {/* <button onClick={pauseCalling}>Pause</button> */}
+            </div>
+
             <div>Status: {status}</div>
             <div>Called: {called.length}</div>
             <div>Marked: {totalMarked}</div>
           </div>
 
-          <div className="card">
+          <div className="card ticket-card">
             <h4>Your Ticket</h4>
             <Ticket grid={grid} onCellClick={handleCellClick} />
           </div>
 
-          <div className="card">
+          <div className="card claim-patterns">
             <h4>Claim Patterns</h4>
-            {["First Five", "Top Line", "Middle Line", "Bottom Line", "Full Housie"].map(
-              (p) => (
-                <button key={p} disabled={!eligible[p] || claimed[p]} onClick={() => claimPattern(p)}>
-                  {claimed[p] ? `${p} — Claimed` : `Claim ${p}`}
-                </button>
-              )
-            )}
+            <div>
+              {["First Five", "Top Line", "Middle Line", "Bottom Line", "Full Housie"].map(
+                (p) => (
+                  <button key={p} disabled={!eligible[p] || claimed[p]} onClick={() => claimPattern(p)}>
+                    {claimed[p] ? `${p} — Claimed` : `Claim ${p}`}
+                  </button>
+                )
+              )}
+            </div>
           </div>
         </section>
+
 
         <section className="right-panel">
           <div className="card">
