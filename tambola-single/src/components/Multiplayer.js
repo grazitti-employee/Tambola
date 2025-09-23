@@ -4,7 +4,6 @@ import Ticket from "./Ticket";
 import "./Multiplayer.css";
 
 const socket = io("http://172.16.21.165:5000");
-// const socket = io("http://172.16.21.146:5000");
 
 export default function Multiplayer({ onBack }) {
   const [roomId, setRoomId] = useState("");
@@ -51,102 +50,112 @@ export default function Multiplayer({ onBack }) {
 
   const joinRoom = (e) => {
     e.preventDefault();
-    if (!joinUsername.trim() || !joinRoomId.trim())
-      return alert("Enter username and room ID");
-    socket.emit(
-      "joinRoom",
-      { roomId: joinRoomId, username: joinUsername },
-      ({ ticket }) => {
-        setTicket(ticket);
-        setRoomId(joinRoomId);
-        setUsername(joinUsername);
-      }
-    );
+    if (!joinUsername.trim() || !joinRoomId.trim()) return alert("Enter username and room ID");
+    socket.emit("joinRoom", { roomId: joinRoomId, username: joinUsername }, ({ ticket }) => {
+      setTicket(ticket);
+      setRoomId(joinRoomId);
+      setUsername(joinUsername);
+    });
   };
 
   const startGame = () => socket.emit("startGame", { roomId });
   const claimPattern = (pattern) => socket.emit("claimPattern", { roomId, pattern, username, ticket });
 
   return (
-    <div className="multiplayer-root">
-      <button onClick={onBack}>⬅ Back</button>
-      <h2>Multiplayer</h2>
+    <div className="mp-app">
+<header className="mp-form-root">
+  <button className="mp-form-back-btn" onClick={onBack}>⬅ Back</button>
+  <h1 className="mp-form-title">Multiplayer</h1>
+</header>
 
-      {/* Before room is created/joined */}
-      {!roomId && !ticket.length && (
-        <>
-          <div className="multiplayer-card">
-            <h4>Create Room</h4>
-            <input
-              placeholder="Your Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <button onClick={createRoom}>Create Room</button>
-          </div>
+{!roomId && !ticket.length && (
+  <main className="mp-form-root">
+    <div className="mp-form-card">
+      <h4>Create Room</h4>
+      <input
+        placeholder="Your Username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+      />
+      <button onClick={createRoom}>Create Room</button>
 
-          <div className="multiplayer-card">
-            <h4>Join Existing Room</h4>
-            <form onSubmit={joinRoom}>
-              <input
-                placeholder="Room ID"
-                value={joinRoomId}
-                onChange={(e) => setJoinRoomId(e.target.value)}
-              />
-              <input
-                placeholder="Username"
-                value={joinUsername}
-                onChange={(e) => setJoinUsername(e.target.value)}
-              />
-              <button type="submit">Join Room</button>
-            </form>
-          </div>
-        </>
-      )}
+      <hr />
 
-      {/* After room is joined/created */}
+      <h4>Join Existing Room</h4>
+      <form onSubmit={joinRoom}>
+        <input
+          placeholder="Room ID"
+          value={joinRoomId}
+          onChange={(e) => setJoinRoomId(e.target.value)}
+        />
+        <input
+          placeholder="Username"
+          value={joinUsername}
+          onChange={(e) => setJoinUsername(e.target.value)}
+        />
+        <button type="submit">Join Room</button>
+      </form>
+    </div>
+  </main>
+)}
+
+
       {roomId && ticket.length > 0 && (
-        <div className="multiplayer-card">
-          <h4>Room: {roomId}</h4>
-          <h4>Players: {players.join(", ")}</h4>
-          {isHost && <button onClick={startGame}>Start Game</button>}
+        <main className="mp-main">
+          <div className="mp-left-panel">
+            <div className="mp-card mp-controls">
+              <h4>Room Info</h4>
+              <p><strong>Room:</strong> {roomId}</p>
+              <p><strong>Players:</strong> {players.join(", ") || "Waiting..."}</p>
+              {isHost && <button onClick={startGame}>Start Game</button>}
+            </div>
 
-          <Ticket
-            grid={ticket}
-            onCellClick={(cell) => {
-              const n = cell.number;
-              if (calledNumbers.includes(n)) {
-                const newGrid = ticket.map((r) =>
-                  r.map((c) =>
-                    c && c.number === n ? { ...c, marked: !c.marked } : c
-                  )
-                );
-                setTicket(newGrid);
-              }
-            }}
-          />
+            <div className="mp-card mp-ticket-card">
+              <h4>Your Ticket</h4>
+              <Ticket
+                grid={ticket}
+                onCellClick={(cell) => {
+                  const n = cell.number;
+                  if (calledNumbers.includes(n)) {
+                    const newGrid = ticket.map((r) =>
+                      r.map((c) => (c && c.number === n ? { ...c, marked: !c.marked } : c))
+                    );
+                    setTicket(newGrid);
+                  }
+                }}
+              />
+            </div>
 
-          <div>
-            <h4>Called Numbers ({calledNumbers.length})</h4>
-            <div>{calledNumbers.join(", ")}</div>
+            <div className="mp-card mp-claim-patterns">
+              <h4>Claim Patterns</h4>
+              <div>
+                {["First Five", "Top Line", "Middle Line", "Bottom Line", "Full Housie"].map((p) => (
+                  <button
+                    key={p}
+                    disabled={claimedPatterns[p]}
+                    onClick={() => claimPattern(p)}
+                  >
+                    {claimedPatterns[p] ? `${p} — Claimed by ${claimedPatterns[p]}` : `Claim ${p}`}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div>
-            <h4>Claim Patterns</h4>
-            {["First Five", "Top Line", "Middle Line", "Bottom Line", "Full Housie"].map(
-              (p) => (
-                <button
-                  key={p}
-                  disabled={claimedPatterns[p]}
-                  onClick={() => claimPattern(p)}
-                >
-                  {claimedPatterns[p]
-                    ? `${p} — Claimed by ${claimedPatterns[p]}`
-                    : `Claim ${p}`}
-                </button>
-              )
-            )}
-          </div>
+          <div className="mp-right-panel">
+            <div className="mp-card mp-called-numbers">
+              <h4>Called Numbers ({calledNumbers.length})</h4>
+              <div className="mp-called-grid">
+                {Array.from({ length: 90 }, (_, i) => i + 1).map((n) => (
+                  <div
+                    key={n}
+                    className={`mp-called-num ${calledNumbers.includes(n) ? "mp-highlight" : ""}`}
+                  >
+                    {n}
+                  </div>
+                ))}
+              </div>
+            </div>
 
             <div className="mp-card mp-notifications">
               <h4>Notifications</h4>
