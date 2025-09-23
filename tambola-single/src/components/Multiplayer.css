@@ -20,6 +20,9 @@ body {
   color: #21323a;
 }
 
+/* ======================= */
+/* Multiplayer In-Game Styles */
+/* ======================= */
 .mp-app {
   width: 100%;
   max-width: 1400px;
@@ -31,7 +34,7 @@ body {
 .mp-header {
   display: flex;
   align-items: center;
-  gap: 470px;
+  justify-content: space-between;
   background: var(--card);
   padding: 12px 16px;
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
@@ -73,6 +76,7 @@ body {
   height: 100%;
 }
 
+/* Card base */
 .mp-card {
   background: var(--card);
   border-radius: 12px;
@@ -86,6 +90,7 @@ body {
   font-weight: 600;
 }
 
+/* Buttons inside cards */
 .mp-card button {
   display: inline-block;
   background: var(--accent);
@@ -108,71 +113,18 @@ body {
   cursor: not-allowed;
 }
 
-.mp-ticket-card {
-  height: 185px;
-}
-
-.mp-controls {
-  height: 210px;
-}
-
-.mp-controls div {
-  display: flex;
-  gap: 10px;
-  margin-top: 11px;
-}
-
-.mp-controls button {
-  padding: 8px 12px;
-  font-size: 14px;
-  border-radius: 6px;
-  border: none;
-  background: var(--accent);
-  color: white;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.mp-controls button:hover:enabled {
-  background: var(--accent-2);
-}
-
-.mp-controls button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+/* Ticket & Controls */
+.mp-ticket-card { height: 185px; }
+.mp-controls { height: 210px; }
+.mp-controls div { display: flex; gap: 10px; margin-top: 11px; }
 
 .mp-claim-patterns {
   width: 100%;
   margin-top: 10px;
 }
+.mp-claim-patterns div { display: flex; gap: 10px; }
 
-.mp-claim-patterns div {
-  display: flex;
-  gap: 10px;
-}
-
-.mp-claim-patterns button {
-  width: 80px;
-  padding: 8px 12px;
-  font-size: 14px;
-  border-radius: 6px;
-  border: none;
-  background: var(--accent);
-  color: white;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.mp-claim-patterns button:hover:enabled {
-  background: var(--accent-2);
-}
-
-.mp-claim-patterns button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
+/* Ticket grid */
 .mp-ticket {
   display: grid;
   grid-template-rows: repeat(3, var(--cell-size));
@@ -213,17 +165,14 @@ body {
   color: white;
 }
 
-.mp-called-numbers {
-  text-align: center;
-}
-
+/* Called numbers */
+.mp-called-numbers { text-align: center; }
 .mp-called-grid {
   display: grid;
   grid-template-columns: repeat(10, 1fr);
   gap: 6px;
   margin-top: 10px;
 }
-
 .mp-called-num {
   background: #f5f5f5;
   border: 1px solid #ddd;
@@ -234,7 +183,6 @@ body {
   color: #666;
   transition: all 0.2s ease;
 }
-
 .mp-called-num.mp-highlight {
   background: #ff9800;
   color: #fff;
@@ -243,20 +191,19 @@ body {
   transform: scale(1.1);
 }
 
+/* Notifications */
 .mp-notifications {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  height: 110px;
+  height: 130px;
 }
-
 .mp-notifications-list {
   display: flex;
   flex-direction: column;
   gap: 6px;
   overflow-y: auto;
 }
-
 .mp-notification {
   background: var(--accent);
   color: white;
@@ -267,25 +214,17 @@ body {
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 900px) {
-  .mp-main {
-    grid-template-columns: 1fr;
-  }
+  .mp-main { grid-template-columns: 1fr; }
 }
-/* ======================= */
-/* Multiplayer Create/Join Room Section */
-/* ======================= */
 
+/* ======================= */
+/* Multiplayer Create/Join Form Styles */
+/* ======================= */
 .mp-form-root {
   min-height: 100vh;
   display: flex;
@@ -294,7 +233,6 @@ body {
   justify-content: flex-start;
   padding: 40px 20px;
   background: radial-gradient(circle at top, var(--bg), var(--card));
-  font-family: "Inter", sans-serif;
 }
 
 /* Back button */
@@ -308,10 +246,7 @@ body {
   cursor: pointer;
   transition: color 0.2s;
 }
-
-.mp-form-back-btn:hover {
-  color: var(--accent);
-}
+.mp-form-back-btn:hover { color: var(--accent); }
 
 /* Heading */
 .mp-form-title {
@@ -331,15 +266,12 @@ body {
   max-width: 400px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
-
 .mp-form-card h4 {
   font-size: 1.2rem;
   font-weight: 600;
   color: var(--accent-2);
   margin-bottom: 16px;
 }
-
-/* Inputs */
 .mp-form-card input {
   width: 100%;
   padding: 12px;
@@ -350,12 +282,7 @@ body {
   outline: none;
   transition: border-color 0.2s;
 }
-
-.mp-form-card input:focus {
-  border-color: var(--accent);
-}
-
-/* Buttons */
+.mp-form-card input:focus { border-color: var(--accent); }
 .mp-form-card button {
   width: 100%;
   padding: 12px;
@@ -368,17 +295,8 @@ body {
   cursor: pointer;
   transition: background 0.2s, transform 0.15s;
 }
-
-.mp-form-card button:hover {
-  background: var(--accent-2);
-  transform: translateY(-2px);
-}
-
-.mp-form-card button:active {
-  transform: translateY(1px);
-}
-
-/* Divider */
+.mp-form-card button:hover { background: var(--accent-2); transform: translateY(-2px); }
+.mp-form-card button:active { transform: translateY(1px); }
 .mp-form-card hr {
   margin: 20px 0;
   border: 0;
