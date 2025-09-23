@@ -1,0 +1,387 @@
+:root {
+  --bg: #cfd6e2;
+  --card: #ffffff;
+  --muted: #8b95a3;
+  --accent: #2b7a78;
+  --accent-2: #145a6b;
+  --cell-size: 46px;
+  font-family: "Inter", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: #21323a;
+}
+
+.mp-app {
+  width: 100%;
+  max-width: 1400px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mp-header {
+  display: flex;
+  align-items: center;
+  gap: 470px;
+  background: var(--card);
+  padding: 12px 16px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.mp-header h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.mp-back-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mp-back-btn:hover {
+  background: var(--accent-2);
+}
+
+.mp-main {
+  display: grid;
+  grid-template-columns: 500px 1fr;
+  gap: 15px;
+  align-items: start;
+}
+
+.mp-left-panel,
+.mp-right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+}
+
+.mp-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.mp-card h4 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.mp-card button {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 4px 0;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mp-card button:hover:enabled {
+  background: var(--accent-2);
+}
+
+.mp-card button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mp-ticket-card {
+  height: 185px;
+}
+
+.mp-controls {
+  height: 210px;
+}
+
+.mp-controls div {
+  display: flex;
+  gap: 10px;
+  margin-top: 11px;
+}
+
+.mp-controls button {
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mp-controls button:hover:enabled {
+  background: var(--accent-2);
+}
+
+.mp-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mp-claim-patterns {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.mp-claim-patterns div {
+  display: flex;
+  gap: 10px;
+}
+
+.mp-claim-patterns button {
+  width: 80px;
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mp-claim-patterns button:hover:enabled {
+  background: var(--accent-2);
+}
+
+.mp-claim-patterns button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mp-ticket {
+  display: grid;
+  grid-template-rows: repeat(3, var(--cell-size));
+  gap: 4px;
+  padding: 6px;
+  border: 2px solid var(--accent-2);
+  border-radius: 10px;
+  margin-left: 65px;
+}
+
+.mp-ticket-row {
+  display: grid;
+  grid-template-columns: repeat(9, var(--cell-size));
+  gap: 4px;
+}
+
+.mp-ticket-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f6fb;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #21323a;
+  cursor: pointer;
+}
+
+.mp-ticket-cell.empty {
+  background: transparent;
+  color: transparent;
+  cursor: default;
+  border: 1px dashed rgba(10, 20, 30, 0.08);
+}
+
+.mp-ticket-cell.marked {
+  background: var(--accent);
+  color: white;
+}
+
+.mp-called-numbers {
+  text-align: center;
+}
+
+.mp-called-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.mp-called-num {
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.mp-called-num.mp-highlight {
+  background: #ff9800;
+  color: #fff;
+  font-weight: 700;
+  border-color: #e68900;
+  transform: scale(1.1);
+}
+
+.mp-notifications {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 110px;
+}
+
+.mp-notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.mp-notification {
+  background: var(--accent);
+  color: white;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .mp-main {
+    grid-template-columns: 1fr;
+  }
+}
+/* ======================= */
+/* Multiplayer Create/Join Room Section */
+/* ======================= */
+
+.mp-form-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 40px 20px;
+  background: radial-gradient(circle at top, var(--bg), var(--card));
+  font-family: "Inter", sans-serif;
+}
+
+/* Back button */
+.mp-form-back-btn {
+  align-self: flex-start;
+  margin-bottom: 20px;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: var(--accent-2);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.mp-form-back-btn:hover {
+  color: var(--accent);
+}
+
+/* Heading */
+.mp-form-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: var(--accent-2);
+}
+
+/* Card sections */
+.mp-form-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 24px;
+  margin: 16px 0;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.mp-form-card h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--accent-2);
+  margin-bottom: 16px;
+}
+
+/* Inputs */
+.mp-form-card input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  border: 1px solid var(--muted);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.mp-form-card input:focus {
+  border-color: var(--accent);
+}
+
+/* Buttons */
+.mp-form-card button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  background: var(--accent);
+  color: var(--card);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.mp-form-card button:hover {
+  background: var(--accent-2);
+  transform: translateY(-2px);
+}
+
+.mp-form-card button:active {
+  transform: translateY(1px);
+}
+
+/* Divider */
+.mp-form-card hr {
+  margin: 20px 0;
+  border: 0;
+  border-top: 1px solid var(--muted);
+  opacity: 0.5;
+}
