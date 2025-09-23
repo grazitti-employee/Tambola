@@ -22,37 +22,106 @@ function getNRandomUnique(from, to, count) {
 }
 
 /* Generate ticket grid (3x9, 15 numbers total) */
-function generateTicketGrid() {
-  const rows = 3;
-  const cols = 9;
+// Drop-in replacement for generateTicketGrid() using the exact balanced logic you provided
+function generateTicketGrid(attempt = 0) {
+  if (attempt > 50) throw new Error("Failed to generate ticket after many attempts");
 
-  const chosenPositions = [];
-  for (let r = 0; r < rows; r++) {
-    const colsIndices = shuffleArray(range(cols, 0)).slice(0, 5);
-    for (const c of colsIndices) {
-      chosenPositions.push({ r, c: c - 1 });
+  // helper: shuffled column pools (1..10, 11..20, ..., 81..90)
+  const columnsPool = [];
+  for (let i = 0; i < 9; i++) {
+    const start = i * 10 + 1;
+    const end = i === 8 ? 90 : (i + 1) * 10;
+    const nums = [];
+    for (let n = start; n <= end; n++) nums.push(n);
+    // shuffle
+    nums.sort(() => Math.random() - 0.5);
+    columnsPool.push(nums);
+  }
+
+  // ticket skeleton: 3 rows x 9 cols, initialized with null
+  const ticket = Array.from({ length: 3 }, () => Array(9).fill(null));
+  const rowCounts = [0, 0, 0];
+
+  // Allowed splits for each 3-column block (they sum to 5)
+  const splits = [
+    [2, 2, 1],
+    [2, 1, 2],
+    [1, 2, 2],
+  ];
+
+  for (let block = 0; block < 3; block++) {
+    const cols = [block * 3, block * 3 + 1, block * 3 + 2];
+
+    // choose a valid split that doesn't overflow rowCounts
+    let chosenSplit = null;
+    const shuffledSplits = splits.slice().sort(() => Math.random() - 0.5);
+    for (const split of shuffledSplits) {
+      let ok = true;
+      for (let r = 0; r < 3; r++) {
+        if (rowCounts[r] + split[r] > 5) {
+          ok = false;
+          break;
+        }
+      }
+      if (ok) {
+        chosenSplit = split;
+        break;
+      }
+    }
+
+    // if no split works, retry whole ticket
+    if (!chosenSplit) {
+      return generateTicketGrid(attempt + 1);
+    }
+
+    // update rowCounts
+    for (let r = 0; r < 3; r++) rowCounts[r] += chosenSplit[r];
+
+    // allocate positions for this block according to chosenSplit
+    const allPositions = []; // entries of form [row, col]
+    for (let r = 0; r < 3; r++) {
+      const colsCopy = [...cols];
+      for (let k = 0; k < chosenSplit[r]; k++) {
+        const idx = Math.floor(Math.random() * colsCopy.length);
+        const col = colsCopy.splice(idx, 1)[0];
+        allPositions.push([r, col]);
+      }
+    }
+
+    // group by column -> rows to fill that column
+    const colBuckets = {};
+    for (const c of cols) colBuckets[c] = [];
+    allPositions.forEach(([r, c]) => colBuckets[c].push(r));
+
+    // for each column in block: pick required numbers (from that column pool), sort ascending, place in rows ascending
+    for (const c of cols) {
+      colBuckets[c].sort((a, b) => a - b); // top-to-bottom order
+      const takeCount = colBuckets[c].length;
+      // take numbers from the column pool (they were pre-shuffled), then sort numerically ascending
+      const picked = columnsPool[c].splice(0, takeCount).sort((a, b) => a - b);
+      for (let i = 0; i < takeCount; i++) {
+        const rowIndex = colBuckets[c][i];
+        ticket[rowIndex][c] = {
+          number: picked[i],
+          marked: false,
+          row: rowIndex,
+          col: c,
+        };
+      }
     }
   }
 
-  const numbers = getNRandomUnique(1, 90, 15);
-  const shuffledNumbers = shuffleArray(numbers);
-
-  const grid = Array.from({ length: rows }, () =>
-    Array.from({ length: cols }, () => null)
-  );
-
-  for (let i = 0; i < chosenPositions.length; i++) {
-    const { r, c } = chosenPositions[i];
-    grid[r][c] = {
-      number: shuffledNumbers[i],
-      marked: false,
-      row: r,
-      col: c,
-    };
+  // Final sanity check: each row must have exactly 5 numbers and total 15
+  const finalRowCounts = ticket.map((row) => row.filter(Boolean).length);
+  const totalNumbers = finalRowCounts.reduce((s, n) => s + n, 0);
+  if (finalRowCounts.some((c) => c !== 5) || totalNumbers !== 15) {
+    // if somehow invalid, retry
+    return generateTicketGrid(attempt + 1);
   }
 
-  console.log("Generated ticket grid", grid);
-  return grid;
+  // Success
+  console.log("Generated balanced Tambola ticket:", ticket);
+  return ticket;
 }
 
 /* Verify winning patterns */
