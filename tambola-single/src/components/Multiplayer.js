@@ -3,6 +3,7 @@ import { io } from "socket.io-client";
 import Ticket from "./Ticket";
 import "./Multiplayer.css";
 
+// ⚠️ Replace with your backend address
 const socket = io("http://10.20.208.200:5000");
 
 export default function Multiplayer({ onBack }) {
@@ -23,31 +24,52 @@ export default function Multiplayer({ onBack }) {
   }
 
   useEffect(() => {
+    // --- Socket Listeners ---
     socket.on("playerList", setPlayers);
-    socket.on("gameStarted", () => addNotification("Game started!"));
-    socket.on("numberCalled", (n) => setCalledNumbers((prev) => [...prev, n]));
+
+    socket.on("gameStarted", () => {
+      addNotification("Game started!");
+      setCalledNumbers([]); // reset old numbers
+    });
+
+    socket.on("numberCalled", (n) => {
+      setCalledNumbers((prev) => [...prev, n]);
+    });
+
     socket.on("notification", (msg) => addNotification(msg));
+
     socket.on("patternClaimed", ({ pattern, by }) => {
       addNotification(`${by} claimed ${pattern}`);
       setClaimedPatterns((prev) => ({ ...prev, [pattern]: by }));
     });
+
     socket.on("claimResult", ({ pattern, success, msg }) => {
       if (!success) addNotification(`Claim failed for ${pattern}: ${msg}`);
     });
 
-    return () => socket.off();
+    // Cleanup
+    return () => {
+      socket.off("playerList");
+      socket.off("gameStarted");
+      socket.off("numberCalled");
+      socket.off("notification");
+      socket.off("patternClaimed");
+      socket.off("claimResult");
+    };
   }, []);
 
+  // --- Room Handling ---
   const createRoom = () => {
     if (!username.trim()) return alert("Enter a username first");
     socket.emit("createRoom", (newRoomId) => {
       setRoomId(newRoomId);
       setIsHost(true);
-      socket.emit(
-        "joinRoom",
-        { roomId: newRoomId, username },
-        ({ ticket }) => setTicket(ticket)
-      );
+      socket.emit("joinRoom", { roomId: newRoomId, username }, (res) => {
+        if (res.error) return alert(res.error);
+        setTicket(res.ticket);
+        setClaimedPatterns(res.claimed);
+        setCalledNumbers(res.calledNumbers);
+      });
     });
   };
 
@@ -55,21 +77,23 @@ export default function Multiplayer({ onBack }) {
     e.preventDefault();
     if (!joinUsername.trim() || !joinRoomId.trim())
       return alert("Enter username and room ID");
-    socket.emit(
-      "joinRoom",
-      { roomId: joinRoomId, username: joinUsername },
-      ({ ticket }) => {
-        setTicket(ticket);
-        setRoomId(joinRoomId);
-        setUsername(joinUsername);
-      }
-    );
+
+    socket.emit("joinRoom", { roomId: joinRoomId, username: joinUsername }, (res) => {
+      if (res.error) return alert(res.error);
+      setTicket(res.ticket);
+      setRoomId(res.roomId);
+      setUsername(joinUsername);
+      setClaimedPatterns(res.claimed);
+      setCalledNumbers(res.calledNumbers);
+    });
   };
 
   const startGame = () => socket.emit("startGame", { roomId });
+
   const claimPattern = (pattern) =>
     socket.emit("claimPattern", { roomId, pattern, username, ticket });
 
+  // --- UI ---
   return (
     <div className="mp-app">
       {/* Header */}
@@ -80,7 +104,7 @@ export default function Multiplayer({ onBack }) {
         <h1 className="mp-title">Multiplayer</h1>
       </header>
 
-      {/* Create/Join Room */}
+      {/* Create / Join Room */}
       {!roomId && !ticket.length && (
         <div className="mp-form-root">
           <div className="mp-form-card">

@@ -29,48 +29,107 @@ function range(n, start = 1) {
   return Array.from({ length: n }, (_, i) => i + start);
 }
 
-function getNRandomUnique(from, to, count) {
-  const pool = range(to - from + 1, from);
-  return shuffleArray(pool).slice(0, count);
-}
+// ----------------- New Ticket Grid Generator -----------------
+function generateTicketGrid(attempt = 0) {
+  if (attempt > 50) throw new Error("Failed to generate ticket after many attempts");
 
-function generateTicketGrid() {
-  const rows = 3;
-  const cols = 9;
-  const chosenPositions = [];
-
-  for (let r = 0; r < rows; r++) {
-    const colsIndices = shuffleArray(range(cols, 0)).slice(0, 5);
-    for (const c of colsIndices) chosenPositions.push({ r, c: c - 1 });
+  const columnsPool = [];
+  for (let i = 0; i < 9; i++) {
+    const start = i * 10 + 1;
+    const end = i === 8 ? 90 : (i + 1) * 10;
+    const nums = [];
+    for (let n = start; n <= end; n++) nums.push(n);
+    nums.sort(() => Math.random() - 0.5);
+    columnsPool.push(nums);
   }
 
-  const numbers = getNRandomUnique(1, 90, 15);
-  const shuffledNumbers = shuffleArray(numbers);
+  const ticket = Array.from({ length: 3 }, () => Array(9).fill(null));
+  const rowCounts = [0, 0, 0];
+  const splits = [
+    [2, 2, 1],
+    [2, 1, 2],
+    [1, 2, 2],
+  ];
 
-  const grid = Array.from({ length: rows }, () =>
-    Array.from({ length: cols }, () => null)
-  );
+  for (let block = 0; block < 3; block++) {
+    const cols = [block * 3, block * 3 + 1, block * 3 + 2];
 
-  for (let i = 0; i < chosenPositions.length; i++) {
-    const { r, c } = chosenPositions[i];
-    grid[r][c] = { number: shuffledNumbers[i], marked: false, row: r, col: c };
+    let chosenSplit = null;
+    const shuffledSplits = splits.slice().sort(() => Math.random() - 0.5);
+    for (const split of shuffledSplits) {
+      let ok = true;
+      for (let r = 0; r < 3; r++) {
+        if (rowCounts[r] + split[r] > 5) {
+          ok = false;
+          break;
+        }
+      }
+      if (ok) {
+        chosenSplit = split;
+        break;
+      }
+    }
+
+    if (!chosenSplit) {
+      return generateTicketGrid(attempt + 1);
+    }
+
+    for (let r = 0; r < 3; r++) rowCounts[r] += chosenSplit[r];
+
+    const allPositions = [];
+    for (let r = 0; r < 3; r++) {
+      const colsCopy = [...cols];
+      for (let k = 0; k < chosenSplit[r]; k++) {
+        const idx = Math.floor(Math.random() * colsCopy.length);
+        const col = colsCopy.splice(idx, 1)[0];
+        allPositions.push([r, col]);
+      }
+    }
+
+    const colBuckets = {};
+    for (const c of cols) colBuckets[c] = [];
+    allPositions.forEach(([r, c]) => colBuckets[c].push(r));
+
+    for (const c of cols) {
+      colBuckets[c].sort((a, b) => a - b);
+      const takeCount = colBuckets[c].length;
+      const picked = columnsPool[c].splice(0, takeCount).sort((a, b) => a - b);
+      for (let i = 0; i < takeCount; i++) {
+        const rowIndex = colBuckets[c][i];
+        ticket[rowIndex][c] = {
+          number: picked[i],
+          marked: false,
+          row: rowIndex,
+          col: c,
+        };
+      }
+    }
   }
 
-  return grid;
+  const finalRowCounts = ticket.map((row) => row.filter(Boolean).length);
+  const totalNumbers = finalRowCounts.reduce((s, n) => s + n, 0);
+  if (finalRowCounts.some((c) => c !== 5) || totalNumbers !== 15) {
+    return generateTicketGrid(attempt + 1);
+  }
+
+  return ticket;
 }
 
 // ----------------- Rooms Management -----------------
-const rooms = {}; // { roomId: { host: socket.id, players: {socket.id: {...}} , calledNumbers: [], claimed: {} } }
+const rooms = {}; 
+// { roomId: { host, players: {socket.id: {username, ticket}}, calledNumbers, claimed, interval } }
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
+  // Create Room
   socket.on("createRoom", (callback) => {
     const roomId = Math.random().toString(36).substring(2, 8);
     rooms[roomId] = {
       host: socket.id,
       players: {},
       calledNumbers: [],
+      interval: null,
       claimed: {
         "First Five": null,
         "Top Line": null,
@@ -83,42 +142,60 @@ io.on("connection", (socket) => {
     callback(roomId);
   });
 
+  // Join Room
   socket.on("joinRoom", ({ roomId, username }, callback) => {
     const room = rooms[roomId];
     if (!room) return callback({ error: "Room not found" });
 
-    // Assign unique ticket
     const ticket = generateTicketGrid();
     room.players[socket.id] = { username, ticket };
     socket.join(roomId);
 
     console.log(`${username} joined room ${roomId}`);
     io.to(roomId).emit("playerList", Object.values(room.players).map(p => p.username));
-    callback({ ticket, roomId, claimed: room.claimed, calledNumbers: room.calledNumbers });
+
+    callback({ 
+      ticket, 
+      roomId, 
+      claimed: room.claimed, 
+      calledNumbers: room.calledNumbers 
+    });
   });
 
+  // Start Game (auto number calling every 3s)
   socket.on("startGame", ({ roomId }) => {
     const room = rooms[roomId];
     if (!room || room.host !== socket.id) return;
+
+    // Reset
     room.calledNumbers = [];
+    if (room.interval) clearInterval(room.interval);
+
     io.to(roomId).emit("gameStarted");
+    io.to(roomId).emit("notification", "Game Started!");
+
+    let numbers = shuffleArray(range(90, 1));
+
+    room.interval = setInterval(() => {
+      if (numbers.length === 0) {
+        clearInterval(room.interval);
+        io.to(roomId).emit("notification", "All numbers called. Game over!");
+        return;
+      }
+
+      const next = numbers.shift();
+      room.calledNumbers.push(next);
+
+      io.to(roomId).emit("numberCalled", next);
+      io.to(roomId).emit("notification", `Number called: ${next}`);
+    }, 3000);
   });
 
-  socket.on("callNumber", ({ roomId, number }) => {
-    const room = rooms[roomId];
-    if (!room || room.host !== socket.id) return;
-
-    if (!room.calledNumbers.includes(number)) {
-      room.calledNumbers.push(number);
-      io.to(roomId).emit("numberCalled", number);
-    }
-  });
-
+  // Claim Pattern
   socket.on("claimPattern", ({ roomId, pattern, username, ticket }) => {
     const room = rooms[roomId];
     if (!room) return;
 
-    // Server verifies
     const flatten = ticket.flat().filter(Boolean);
     const markedCells = flatten.filter((c) => c.marked);
     let valid = false;
@@ -134,7 +211,6 @@ io.on("connection", (socket) => {
       return;
     }
 
-    // Check if already claimed
     if (room.claimed[pattern]) {
       socket.emit("claimResult", { pattern, success: false, msg: "Already claimed" });
       return;
@@ -144,42 +220,19 @@ io.on("connection", (socket) => {
     io.to(roomId).emit("patternClaimed", { pattern, by: username });
   });
 
+  // Disconnect
   socket.on("disconnecting", () => {
     for (const roomId of socket.rooms) {
       if (rooms[roomId] && rooms[roomId].players[socket.id]) {
         delete rooms[roomId].players[socket.id];
-        io.to(roomId).emit("playerList", Object.values(rooms[roomId].players).map(p => p.username));
+        io.to(roomId).emit(
+          "playerList", 
+          Object.values(rooms[roomId].players).map(p => p.username)
+        );
       }
     }
     console.log("User disconnected:", socket.id);
   });
 });
 
-// server.js
-io.on("connection", (socket) => {
-  socket.on("startGame", ({ roomId }) => {
-    let numbers = Array.from({ length: 90 }, (_, i) => i + 1)
-      .sort(() => Math.random() - 0.5);
-
-    io.to(roomId).emit("notification", "Game Started!");
-    
-    let interval = setInterval(() => {
-      if (numbers.length === 0) {
-        clearInterval(interval);
-        io.to(roomId).emit("notification", "All numbers called. Game over!");
-        return;
-      }
-      const next = numbers.shift();
-      io.to(roomId).emit("numberCalled", next);
-      io.to(roomId).emit("notification", `Number called: ${next}`);
-    }, 3000);
-
-    // Stop game if room closes
-    socket.on("disconnect", () => clearInterval(interval));
-  });
-});
-
-
 server.listen(5000, () => console.log("Socket.IO server running on port 5000"));
-
-
