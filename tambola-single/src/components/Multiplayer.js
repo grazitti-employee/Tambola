@@ -4,7 +4,7 @@ import Ticket from "./Ticket";
 import "./Multiplayer.css";
 
 // ⚠️ Replace with your backend address
-const socket = io("http://10.20.208.200:5000");
+const socket = io("http://172.16.21.165:5000");
 
 export default function Multiplayer({ onBack }) {
   const [roomId, setRoomId] = useState("");
